@@ -14,15 +14,15 @@ final _router = Router()
   ..get('/ws', webSocketHandler(_wsHendler));
 
 void _wsHendler(webSocket) {
+  webSocket.sink.add(_counterValue.toString());
   stdout.writeln('[CONNECTED] $webSocket');
 
-  webSocket.stream.listen((dynamic message) {
+  webSocket.stream.listen((dynamic message) async {
     stdout.writeln('[RECEVED] $message');
 
     if (message == 'increment') {
-      webSocket.sink.add("echo $message");
       _counterValue++;
-      webSocket.sink.add(_counterValue);
+      webSocket.sink.add(_counterValue.toString());
     }
   });
 }
