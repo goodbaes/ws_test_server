@@ -5,6 +5,8 @@ import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 
+int _counterValue = 0;
+
 // Configure routes.
 final _router = Router()
   ..get('/', _rootHandler)
@@ -12,8 +14,16 @@ final _router = Router()
   ..get('/ws', webSocketHandler(_wsHendler));
 
 void _wsHendler(webSocket) {
+  stdout.writeln('[CONNECTED] $webSocket');
+
   webSocket.stream.listen((dynamic message) {
-    webSocket.sink.add("echo $message");
+    stdout.writeln('[RECEVED] $message');
+
+    if (message == 'increment') {
+      webSocket.sink.add("echo $message");
+      _counterValue++;
+      webSocket.sink.add(_counterValue);
+    }
   });
 }
 
