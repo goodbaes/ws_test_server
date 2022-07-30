@@ -1,31 +1,36 @@
 import 'dart:io';
 
+import 'package:redis/redis.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-int _counterValue = 0;
 var _clients = <WebSocketChannel>[];
+late final RedisConnection redisConnection;
+late final Command command;
 // Configure routes.
 final _router = Router()
   ..get('/', _rootHandler)
   ..get('/echo/<message>', _echoHandler)
   ..get('/ws', webSocketHandler(_wsHendler));
 
-void _wsHendler(webSocket) {
+void _wsHendler(WebSocketChannel webSocket) {
   _clients.add(webSocket);
-  webSocket.sink.add(_counterValue.toString());
+
+  command.send_object(['GET', 'counter']).then(
+    (value) => webSocket.sink.add(value.toString()),
+  );
+
   stdout.writeln('[CONNECTED] $webSocket');
 
   webSocket.stream.listen((dynamic message) async {
     stdout.writeln('[RECEVED] $message');
-
+    final newValue = command.send_object(['INCR', 'counter']);
     if (message == 'increment') {
-      _counterValue++;
       for (final client in _clients) {
-        client.sink.add(_counterValue.toString());
+        client.sink.add(newValue.toString());
       }
     }
   }, onDone: () {
@@ -43,6 +48,8 @@ Response _echoHandler(Request request) {
 }
 
 void main(List<String> args) async {
+  redisConnection = RedisConnection();
+  command = await redisConnection.connect('localHost', '6379');
   // Use any available host or container IP (usually `0.0.0.0`).
   final ip = InternetAddress.anyIPv4;
 

@@ -8,9 +8,11 @@ environment:
 
 dependencies:
   args: ^2.0.0
+  redis: ^3.1.0
   shelf: ^1.1.0
   shelf_router: ^1.0.0
   shelf_web_socket: ^1.0.2
+  web_socket_channel: ^2.2.0
 
 dev_dependencies:
   http: ^0.13.0
