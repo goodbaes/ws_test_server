@@ -4,9 +4,10 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 int _counterValue = 0;
-
+var _clients = <WebSocketChannel>[];
 // Configure routes.
 final _router = Router()
   ..get('/', _rootHandler)
@@ -14,6 +15,7 @@ final _router = Router()
   ..get('/ws', webSocketHandler(_wsHendler));
 
 void _wsHendler(webSocket) {
+  _clients.add(webSocket);
   webSocket.sink.add(_counterValue.toString());
   stdout.writeln('[CONNECTED] $webSocket');
 
@@ -22,8 +24,12 @@ void _wsHendler(webSocket) {
 
     if (message == 'increment') {
       _counterValue++;
-      webSocket.sink.add(_counterValue.toString());
+      for (final client in _clients) {
+        client.sink.add(_counterValue.toString());
+      }
     }
+  }, onDone: () {
+    _clients.remove(webSocket);
   });
 }
 
