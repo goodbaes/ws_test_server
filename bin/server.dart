@@ -27,7 +27,7 @@ void _wsHendler(WebSocketChannel webSocket) {
 
   webSocket.stream.listen((dynamic message) async {
     stdout.writeln('[RECEVED] $message');
-    final newValue = command.send_object(['INCR', 'counter']);
+    final newValue = await command.send_object(['INCR', 'counter']);
     if (message == 'increment') {
       for (final client in _clients) {
         client.sink.add(newValue.toString());
@@ -49,7 +49,7 @@ Response _echoHandler(Request request) {
 
 void main(List<String> args) async {
   redisConnection = RedisConnection();
-  command = await redisConnection.connect('localHost', '6379');
+  command = await redisConnection.connect('localHost', 6379);
   // Use any available host or container IP (usually `0.0.0.0`).
   final ip = InternetAddress.anyIPv4;
 
