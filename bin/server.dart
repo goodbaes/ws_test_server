@@ -49,7 +49,7 @@ Response _echoHandler(Request request) {
 
 void main(List<String> args) async {
   redisConnection = RedisConnection();
-  command = await redisConnection.connect('localHost', 6379);
+  command = await redisConnection.connect('localhost', 6379);
   // Use any available host or container IP (usually `0.0.0.0`).
   final ip = InternetAddress.anyIPv4;
 
