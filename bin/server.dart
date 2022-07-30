@@ -51,7 +51,7 @@ void main(List<String> args) async {
   redisConnection = RedisConnection();
   final ip = InternetAddress.anyIPv4;
 
-  command = await redisConnection.connect(ip.address, 6379);
+  command = await redisConnection.connect("localhost", 6379);
 
   final handler = Pipeline().addMiddleware(logRequests()).addHandler(_router);
 
